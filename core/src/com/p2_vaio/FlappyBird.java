@@ -19,9 +19,11 @@ public class FlappyBird extends ApplicationAdapter {
 	Texture background;
 	Texture birds[];
 	Texture toptube,bottomtube;
+	Texture gameOver;
 
 	int flap_state=0;
 	float accumulator = 0f;
+	float accumulator1 = 0f;
 
 	float birdY=0;
 	float velocity = 0;
@@ -63,12 +65,13 @@ public class FlappyBird extends ApplicationAdapter {
 
 		toptuberectangle = new Rectangle[no_of_tubes];
 		bottomtuberectangle = new Rectangle[no_of_tubes];
+		gameOver = new Texture("flappy-bird-game-over.png");
 
         score=0;
         scoringtube=0;
         bitmapFont = new BitmapFont();
         bitmapFont.setColor(Color.WHITE);
-        bitmapFont.getData().setScale(10);
+        bitmapFont.getData().setScale(7);
 
 		//setting the background to bg image
 		background= new Texture("bg.png");
@@ -77,14 +80,18 @@ public class FlappyBird extends ApplicationAdapter {
 		toptube = new Texture("toptube.png");
 		bottomtube = new Texture("bottomtube.png");
 
-		birdY=Gdx.graphics.getHeight()/2-birds[flap_state].getHeight()/2;
+
 
 		maxtubeofset=Gdx.graphics.getHeight()/2-gap/2-100;
 		random = new Random();
-
-
-
 		distancebetweentubes=Gdx.graphics.getWidth()*3/4;
+
+		startGame();
+
+	}
+
+	public void startGame(){
+		birdY=Gdx.graphics.getHeight()/2-birds[flap_state].getHeight()/2;
 
 		for(int i=0;i<no_of_tubes;i++){
 			tubeofset[i] = (random.nextFloat()-0.5f)*(Gdx.graphics.getHeight()-gap-200);
@@ -105,7 +112,7 @@ public class FlappyBird extends ApplicationAdapter {
 		//repeatedlt displaying it on screen
 		batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-		if(gamestate!=0) {
+		if(gamestate==1) {
 
 			if(tubeX[scoringtube]<Gdx.graphics.getWidth()/2){
 				score++;
@@ -145,18 +152,41 @@ public class FlappyBird extends ApplicationAdapter {
 
 			}
 
-			if(birdY>0||velocity<0){
+			if(birdY>0){
 
 				velocity+=gravity;
 				birdY-=velocity;
+			}else{
+				gamestate=2;
 			}
 
-		}else{
+		}else if (gamestate==0){
 			if(Gdx.input.justTouched()){
 
 				//birdY++;
 				gamestate=1;
 			}
+		}else if(gamestate==2){
+
+			batch.draw(gameOver, Gdx.graphics.getWidth() / 2 - gameOver.getWidth() / 2, Gdx.graphics.getHeight()/2-gameOver.getHeight()/2);
+
+			float dt = Gdx.graphics.getDeltaTime(); //dt is the number of seconds that have passed in between each frame
+			accumulator1 += dt;
+			if (accumulator1 > 2)//one second has passed
+			{
+				if(Gdx.input.justTouched()){
+					//birdY++;
+					gamestate=1;
+					startGame();
+					score=0;
+					scoringtube=0;
+					velocity=0;
+
+				}
+				accumulator1 -= 0.15;
+			}
+
+
 		}
 
 		float dt = Gdx.graphics.getDeltaTime(); //dt is the number of seconds that have passed in between each frame
@@ -177,7 +207,7 @@ public class FlappyBird extends ApplicationAdapter {
 
 		bitmapFont.draw(batch,String.valueOf(score),100,200);
 
-		batch.end();
+
 
 		birdCircle.set(Gdx.graphics.getWidth()/2,birdY+birds[flap_state].getHeight()/2,birds[flap_state].getHeight()/2);
 
@@ -192,11 +222,13 @@ public class FlappyBird extends ApplicationAdapter {
 
 			if(Intersector.overlaps(birdCircle,toptuberectangle[i])||Intersector.overlaps(birdCircle,bottomtuberectangle[i])){
 				//Gdx.app.log("Collision","yes");
+				gamestate=2;
 			}
 
 		}
 
 		//shapeRenderer.end();
+		batch.end();
 
 	}
 	
