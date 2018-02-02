@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
@@ -47,6 +48,10 @@ public class FlappyBird extends ApplicationAdapter {
 
 	Random random;
 
+	int score;
+	int scoringtube;
+	BitmapFont bitmapFont;
+
 	//runs one time on run
 	@Override
 	public void create () {
@@ -59,6 +64,11 @@ public class FlappyBird extends ApplicationAdapter {
 		toptuberectangle = new Rectangle[no_of_tubes];
 		bottomtuberectangle = new Rectangle[no_of_tubes];
 
+        score=0;
+        scoringtube=0;
+        bitmapFont = new BitmapFont();
+        bitmapFont.setColor(Color.WHITE);
+        bitmapFont.getData().setScale(10);
 
 		//setting the background to bg image
 		background= new Texture("bg.png");
@@ -97,6 +107,15 @@ public class FlappyBird extends ApplicationAdapter {
 
 		if(gamestate!=0) {
 
+			if(tubeX[scoringtube]<Gdx.graphics.getWidth()/2){
+				score++;
+				Gdx.app.log("Collision","No"+" "+score);
+				if(scoringtube<no_of_tubes-1)
+					scoringtube++;
+				else
+					scoringtube=0;
+			}
+
 			//detecting the tap
 			if(Gdx.input.justTouched()){
  				//birdY++;
@@ -114,6 +133,7 @@ public class FlappyBird extends ApplicationAdapter {
 
 				}else{
 					tubeX[i] -= tubevelocity;
+
 				}
 
 
@@ -154,6 +174,9 @@ public class FlappyBird extends ApplicationAdapter {
 
 
 		batch.draw(birds[flap_state], Gdx.graphics.getWidth() / 2 - birds[flap_state].getWidth() / 2, birdY);
+
+		bitmapFont.draw(batch,String.valueOf(score),100,200);
+
 		batch.end();
 
 		birdCircle.set(Gdx.graphics.getWidth()/2,birdY+birds[flap_state].getHeight()/2,birds[flap_state].getHeight()/2);
@@ -168,7 +191,7 @@ public class FlappyBird extends ApplicationAdapter {
 
 
 			if(Intersector.overlaps(birdCircle,toptuberectangle[i])||Intersector.overlaps(birdCircle,bottomtuberectangle[i])){
-				Gdx.app.log("Collision","yes");
+				//Gdx.app.log("Collision","yes");
 			}
 
 		}
